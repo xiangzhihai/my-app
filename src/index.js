@@ -28,7 +28,7 @@ function Board() {
 
   const renderRow = (i) => {
     return (
-      <div className="board-row">
+      <div key={i} className="board-row">
         {[...new Array(15).keys()].map(num =>
           <Square key={num + i}
             value={squares[num + i]}
