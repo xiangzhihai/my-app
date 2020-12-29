@@ -14,50 +14,70 @@ function Square(props) {
 }
 
 
-function Board() {
-  const [status, setStatus] = useState("Next Player: X");
-  const [xIsNext, setxIsNext] = useState(true);
-  const [squares, setSquares] = useState(new Array(15 * 15).fill(null));
-  const [winner, setWinner] = useState(null);
-  const handleClick = (i) => {
-    const squCopy = [...squares];
-    if (squCopy[i] || winner) return;
-    squCopy[i] = xIsNext ? "X" : "O";
-    setSquares(squCopy);
-    setxIsNext(!xIsNext);
-    setWinner(calculateWinner(squCopy, i));
-    if (winner) setStatus("Winner: " + winner);
-    else setStatus("Next Player: " + (!xIsNext ? "X" : "O"));
-  };
-
+function Board(props) {
   const renderRow = (i) => {
     return (
       <div key={i} className="board-row">
         {[...new Array(15).keys()].map(num =>
           <Square key={num + i}
-            value={squares[num + i]}
-            onClick={() => handleClick(num + i)} />)}
+            value={props.squares[num + i]}
+            onClick={() => props.onClick(num + i)} />)}
       </div>
     );
   };
 
   return (
     <div>
-      <div className="Status">{status}</div>
       {[...new Array(15).keys()].map(num => renderRow(num * 15))}
     </div>
   );
 }
 
 function Game() {
+  const [history, setHistory] = useState([new Array(15 * 15).fill(null)]);
+  const [status, setStatus] = useState("Next Player: X");
+  const [xIsNext, setxIsNext] = useState(true);
+  const [winner, setWinner] = useState(null);
+  const [stepNumber, setStepNumber] = useState(0);
+  const handleClick = (i) => {
+    const hisCopy = history.slice(0, stepNumber + 1);
+    const squCopy = [...hisCopy[hisCopy.length - 1]];
+    if (squCopy[i] || winner) return;
+    squCopy[i] = xIsNext ? "X" : "O";
+    setHistory([...hisCopy, squCopy]);
+    setxIsNext(!xIsNext);
+    const winStatus = calculateWinner(squCopy, i);
+    setWinner(winStatus);
+    setStepNumber(history.length);
+    if (winStatus) setStatus("Winner: " + winner);
+    else setStatus("Next Player: " + (!xIsNext ? "X" : "O"));
+  };
+
+  const jumpTo = (step) => {
+    setStepNumber(step);
+    setxIsNext(step % 2 === 0);
+  };
+
+  const moves = history.map((step, move) => {
+    const desc = move ? "Go to move #" + move : "Go to game start";
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTo(move)}>{desc}</button>
+      </li>
+    );
+  });
+
+
+
   return (
     <div className="game">
       <div className="game-board">
-        <Board />
+        <Board squares={history[history.length - 1]}
+          onClick={i => handleClick(i)} />
       </div>
       <div className="game-info">
-        <div>{/** status */}</div>
-        <div>{/** TODO */}</div>
+        <div>{status}</div>
+        <div>{moves}</div>
       </div>
     </div>
   )
