@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 // import App from './App';
 import reportWebVitals from './reportWebVitals';
+import calculateWinner from './gameLogic';
 
 function Square(props) {
   return (
@@ -17,13 +18,16 @@ function Board() {
   const [status, setStatus] = useState("Next Player: X");
   const [xIsNext, setxIsNext] = useState(true);
   const [squares, setSquares] = useState(new Array(15 * 15).fill(null));
+  const [winner, setWinner] = useState(null);
   const handleClick = (i) => {
     const squCopy = [...squares];
-    if (squCopy[i]) return;
-    squCopy[i] = xIsNext? "X" : "O";
+    if (squCopy[i] || winner) return;
+    squCopy[i] = xIsNext ? "X" : "O";
     setSquares(squCopy);
     setxIsNext(!xIsNext);
-    setStatus("Next Player: " + (!xIsNext? "X" : "O"));
+    setWinner(calculateWinner(squCopy, i));
+    if (winner) setStatus("Winner: " + winner);
+    else setStatus("Next Player: " + (!xIsNext ? "X" : "O"));
   };
 
   const renderRow = (i) => {
@@ -49,7 +53,7 @@ function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board/>
+        <Board />
       </div>
       <div className="game-info">
         <div>{/** status */}</div>
@@ -63,6 +67,7 @@ ReactDOM.render(
   <Game />,
   document.getElementById('root')
 );
+
 
 
 
